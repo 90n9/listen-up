@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ListenUp - Warm Storybook</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          mali: ['Mali', 'cursive'],
+          body: ['Sarabun', 'sans-serif'],
+        },
+        colors: {
+          navy: '#1B3A6B',
+          inknavy: '#22335C',
+          teal: '#1AA9B0',
+          orange: '#F58220',
+          grass: '#5FBF3F',
+          skyblue: '#2E7DD1',
+          paper: '#FBF6EC',
+          paper2: '#F6EEDD',
+          paper3: '#F1E6CF',
+          cocoa: '#7A6A4F',
+        },
+        boxShadow: {
+          page: '0 18px 40px -18px rgba(122,90,40,0.45), 0 4px 12px -6px rgba(122,90,40,0.25)',
+          soft: '0 10px 28px -14px rgba(122,90,40,0.40)',
+          inset: 'inset 0 1px 0 rgba(255,255,255,0.6)',
+          press: '0 6px 0 0 rgba(217,108,18,0.55)',
+          pressteal: '0 6px 0 0 rgba(14,128,134,0.55)',
+        },
+        borderRadius: {
+          book: '1.75rem',
+        },
+        transitionTimingFunction: {
+          cozy: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+        },
+      },
+    },
+  };
+</script>
+<style>
+  :root { color-scheme: light; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background-color: #F3E9D4;
+    background-image:
+      radial-gradient(circle at 18% 12%, rgba(245,130,32,0.10), transparent 42%),
+      radial-gradient(circle at 84% 8%, rgba(26,169,176,0.10), transparent 40%),
+      radial-gradient(circle at 50% 100%, rgba(46,125,209,0.08), transparent 55%);
+  }
+  /* faint paper grain */
+  .paper-grain {
+    background-image:
+      repeating-linear-gradient(0deg, rgba(122,90,40,0.025) 0px, rgba(122,90,40,0.025) 1px, transparent 1px, transparent 22px),
+      repeating-linear-gradient(90deg, rgba(122,90,40,0.018) 0px, rgba(122,90,40,0.018) 1px, transparent 1px, transparent 22px);
+  }
+  .screen { display: none; animation: pagein 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .screen.active { display: block; }
+  @keyframes pagein {
+    from { opacity: 0; transform: translateY(10px) rotate(-0.4deg); }
+    to { opacity: 1; transform: translateY(0) rotate(0); }
+  }
+  .reveal { animation: reveal 0.45s cubic-bezier(0.34,1.56,0.64,1) both; }
+  @keyframes reveal {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .twinkle { animation: twinkle 2.4s ease-in-out infinite; }
+  .twinkle.d1 { animation-delay: 0.4s; }
+  .twinkle.d2 { animation-delay: 0.9s; }
+  .twinkle.d3 { animation-delay: 1.3s; }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.35; transform: scale(0.85) rotate(-6deg); }
+    50% { opacity: 1; transform: scale(1.1) rotate(6deg); }
+  }
+  .pop { animation: pop 0.6s cubic-bezier(0.34,1.56,0.64,1) both; }
+  @keyframes pop {
+    0% { transform: scale(0.6); opacity: 0; }
+    70% { transform: scale(1.08); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  /* book page edge stack */
+  .page-edge { position: relative; }
+  .page-edge::before, .page-edge::after {
+    content: ''; position: absolute; inset: 0;
+    border-radius: inherit; z-index: -1;
+  }
+  .page-edge::before {
+    background: #F3E7CE; transform: rotate(-1.4deg) translateY(6px);
+    box-shadow: 0 12px 26px -16px rgba(122,90,40,0.5);
+  }
+  .page-edge::after {
+    background: #EEDFC0; transform: rotate(1.6deg) translateY(10px);
+  }
+  .nav-btn { transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+</style>
+</head>
+<body class="min-h-screen text-inknavy antialiased">
+
+  <!-- Top switcher -->
+  <div class="fixed top-0 inset-x-0 z-50 flex justify-center pt-3 pb-2 px-3 pointer-events-none">
+    <div class="pointer-events-auto flex items-center gap-1 rounded-full bg-paper/90 backdrop-blur-md px-1.5 py-1.5 shadow-soft ring-1 ring-paper3 border border-white/60">
+      <button data-target="home" class="nav-btn nav-tab rounded-full px-4 py-2 text-sm font-body font-semibold text-cocoa hover:text-navy">หน้าแรก</button>
+      <button data-target="play" class="nav-btn nav-tab rounded-full px-4 py-2 text-sm font-body font-semibold text-cocoa hover:text-navy">เล่น</button>
+      <button data-target="results" class="nav-btn nav-tab rounded-full px-4 py-2 text-sm font-body font-semibold text-cocoa hover:text-navy">ผลลัพธ์</button>
+    </div>
+  </div>
+
+  <main class="px-4 pt-20 pb-12 flex justify-center">
+    <div class="w-full max-w-[430px]">
+
+      <!-- ============ HOME ============ -->
+      <section id="home" class="screen active">
+        <div class="page-edge rounded-book bg-paper paper-grain shadow-page ring-1 ring-paper3 border border-white/70 px-6 pt-8 pb-9">
+
+          <!-- Logo + greeting -->
+          <div class="flex flex-col items-center text-center">
+            <img src="../logo.png" alt="ListenUp" class="h-24 w-auto drop-shadow-[0_8px_14px_rgba(122,90,40,0.25)]" />
+            <p class="mt-5 font-mali text-2xl font-700 leading-snug text-navy">อ่านด้วยกัน ฟังด้วยกัน</p>
+            <p class="mt-2 font-body text-[15px] text-cocoa leading-relaxed max-w-[18rem]">เปิดหนังสือเล่มโปรด อ่านให้ลูกฟัง แล้วชวนกันตอบคำถามอย่างอบอุ่น</p>
+          </div>
+
+          <!-- Cozy progress badge -->
+          <div class="mt-6 flex items-center justify-center gap-3">
+            <div class="flex items-center gap-2 rounded-full bg-paper2 px-4 py-2.5 ring-1 ring-paper3 shadow-inset">
+              <span class="text-xl twinkle">⭐</span>
+              <span class="font-mali font-600 text-navy text-lg leading-none">24</span>
+              <span class="font-body text-xs text-cocoa">ดาว</span>
+            </div>
+            <div class="flex items-center gap-2 rounded-full bg-orange/12 px-4 py-2.5 ring-1 ring-orange/25 shadow-inset">
+              <span class="text-xl">🔥</span>
+              <span class="font-mali font-600 text-orange text-lg leading-none">3</span>
+              <span class="font-body text-xs text-[#B5631A]">วันติด</span>
+            </div>
+          </div>
+
+          <!-- Primary CTA -->
+          <button onclick="go('play')" class="mt-7 w-full min-h-[60px] rounded-3xl bg-orange text-white font-mali font-700 text-xl shadow-press ring-1 ring-orange/40 transition-transform duration-200 ease-cozy active:scale-[0.98] active:translate-y-1 active:shadow-none flex items-center justify-center gap-2">
+            <span class="text-2xl">📖</span> เล่นเลย
+          </button>
+
+          <!-- Secondary -->
+          <button onclick="go('play')" class="mt-3 w-full min-h-[56px] rounded-3xl bg-paper2 text-navy font-mali font-600 text-lg ring-1 ring-paper3 shadow-soft transition-transform duration-200 ease-cozy active:scale-[0.98] flex items-center justify-center gap-2">
+            <span class="text-xl">🔖</span> เลือกเรื่อง
+          </button>
+
+          <!-- Level chips -->
+          <div class="mt-7">
+            <p class="font-body text-sm font-600 text-cocoa mb-3 text-center">เลือกระดับการฟัง</p>
+            <div class="flex justify-center gap-3">
+              <button class="group rounded-2xl bg-grass/12 ring-1 ring-grass/35 px-5 py-3 text-center transition-transform duration-200 ease-cozy active:scale-[0.97]">
+                <span class="block font-mali font-700 text-grass text-lg leading-none">ระดับ 1</span>
+                <span class="block font-body text-[11px] text-cocoa mt-1">เริ่มต้น</span>
+              </button>
+              <button class="rounded-2xl bg-teal/12 ring-1 ring-teal/35 px-5 py-3 text-center transition-transform duration-200 ease-cozy active:scale-[0.97]">
+                <span class="block font-mali font-700 text-teal text-lg leading-none">ระดับ 2</span>
+                <span class="block font-body text-[11px] text-cocoa mt-1">กำลังดี</span>
+              </button>
+              <button class="rounded-2xl bg-skyblue/12 ring-1 ring-skyblue/35 px-5 py-3 text-center transition-transform duration-200 ease-cozy active:scale-[0.97]">
+                <span class="block font-mali font-700 text-skyblue text-lg leading-none">ระดับ 3</span>
+                <span class="block font-body text-[11px] text-cocoa mt-1">ท้าทาย</span>
+              </button>
+            </div>
+          </div>
+
+          <p class="mt-7 text-center font-body text-xs text-cocoa/80 leading-relaxed">
+            คุณพ่อคุณแม่อ่านออกเสียงให้ฟัง <br/> แล้วชวนลูกตอบคำถามไปด้วยกันนะ
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ PLAY ============ -->
+      <section id="play" class="screen">
+        <div class="page-edge rounded-book bg-paper paper-grain shadow-page ring-1 ring-paper3 border border-white/70 px-6 pt-7 pb-8">
+
+          <!-- header row -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-grass/15 ring-1 ring-grass/30 text-grass font-mali font-700 text-sm">1</span>
+              <span class="font-body text-sm font-600 text-cocoa">ระดับ 1 - ที่ตลาด</span>
+            </div>
+            <span class="rounded-full bg-paper2 px-3 py-1 ring-1 ring-paper3 font-mali font-600 text-navy text-sm">ข้อ 2/3</span>
+          </div>
+
+          <!-- Story page -->
+          <div class="mt-5 relative">
+            <div class="rounded-3xl bg-gradient-to-b from-white to-paper2 ring-1 ring-paper3 shadow-soft px-6 py-7">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="text-lg">📖</span>
+                <span class="font-body text-xs font-700 uppercase tracking-wide text-orange">อ่านให้ลูกฟัง</span>
+              </div>
+              <p class="font-mali font-600 text-navy text-[26px] leading-[1.6]">
+                ย่าไปซื้อผัก ปลา และเนื้อ ที่ตลาด
+              </p>
+              <button onclick="readAgain()" class="mt-4 inline-flex items-center gap-1.5 font-body text-sm font-600 text-teal transition-transform duration-200 ease-cozy active:scale-[0.97]">
+                <span>↺</span> อ่านอีกครั้ง
+              </button>
+            </div>
+            <span class="absolute -right-2 -top-2 text-2xl twinkle d1 select-none">✨</span>
+          </div>
+
+          <!-- ready button (intro state) -->
+          <button id="readyBtn" onclick="startAsking()" class="mt-5 w-full min-h-[58px] rounded-3xl bg-teal text-white font-mali font-700 text-lg shadow-pressteal ring-1 ring-teal/40 transition-transform duration-200 ease-cozy active:scale-[0.98] active:translate-y-1 active:shadow-none flex items-center justify-center gap-2">
+            <span class="text-xl">🙋</span> พร้อมแล้ว เริ่มถาม
+          </button>
+
+          <!-- Question block -->
+          <div id="qBlock" class="mt-5 hidden">
+            <div class="rounded-3xl bg-paper2 ring-1 ring-paper3 shadow-inset px-6 py-6">
+              <span class="font-body text-xs font-700 uppercase tracking-wide text-skyblue">คำถาม</span>
+              <p class="mt-2 font-mali font-600 text-inknavy text-[22px] leading-snug">
+                ย่าไปซื้อของที่ไหน?
+              </p>
+
+              <!-- reveal button -->
+              <button id="revealBtn" onclick="revealAnswer()" class="mt-5 w-full min-h-[56px] rounded-2xl bg-orange/15 text-[#B5631A] font-mali font-700 text-lg ring-1 ring-orange/35 transition-transform duration-200 ease-cozy active:scale-[0.98] flex items-center justify-center gap-2">
+                <span class="text-xl">🔎</span> เฉลย
+              </button>
+
+              <!-- revealed answer -->
+              <div id="answerBox" class="hidden mt-4">
+                <div class="reveal rounded-2xl bg-white ring-1 ring-grass/30 px-5 py-4 shadow-soft">
+                  <span class="font-body text-xs font-700 text-grass">คำตอบ</span>
+                  <p class="mt-1 font-mali font-700 text-navy text-2xl">ที่ตลาด</p>
+                </div>
+
+                <!-- grading buttons -->
+                <div class="reveal mt-4 grid grid-cols-2 gap-3">
+                  <button onclick="grade(true)" class="min-h-[58px] rounded-2xl bg-grass text-white font-mali font-700 text-lg shadow-[0_6px_0_0_rgba(70,150,46,0.55)] ring-1 ring-grass/40 transition-transform duration-200 ease-cozy active:scale-[0.98] active:translate-y-1 active:shadow-none flex items-center justify-center gap-2">
+                    <span class="text-xl">✓</span> ถูก
+                  </button>
+                  <button onclick="grade(false)" class="min-h-[58px] rounded-2xl bg-white text-[#C7592B] font-mali font-700 text-lg ring-1 ring-orange/40 shadow-soft transition-transform duration-200 ease-cozy active:scale-[0.98] flex items-center justify-center gap-2">
+                    <span class="text-xl">✗</span> ผิด
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- progress dots -->
+          <div class="mt-6 flex items-center justify-center gap-2">
+            <span class="h-2.5 w-2.5 rounded-full bg-grass"></span>
+            <span class="h-2.5 w-7 rounded-full bg-orange"></span>
+            <span class="h-2.5 w-2.5 rounded-full bg-paper3"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ RESULTS ============ -->
+      <section id="results" class="screen">
+        <div class="page-edge rounded-book bg-paper paper-grain shadow-page ring-1 ring-paper3 border border-white/70 px-6 pt-9 pb-10 text-center">
+
+          <!-- sparkle cluster -->
+          <div class="relative mx-auto h-28 w-28 pop">
+            <div class="absolute inset-0 rounded-full bg-orange/12 ring-1 ring-orange/25"></div>
+            <div class="absolute inset-0 flex items-center justify-center text-6xl">⭐</div>
+            <span class="absolute -top-1 left-2 text-2xl twinkle">✨</span>
+            <span class="absolute top-3 -right-1 text-xl twinkle d2">✨</span>
+            <span class="absolute -bottom-1 right-6 text-lg twinkle d3">✨</span>
+          </div>
+
+          <h2 class="mt-6 font-mali font-700 text-3xl text-navy">จบเรื่องแล้ว!</h2>
+          <p class="mt-2 font-body text-[15px] text-cocoa">เรื่อง "ที่ตลาด" - ระดับ 1</p>
+
+          <!-- score -->
+          <div class="mt-6 inline-flex flex-col items-center rounded-3xl bg-gradient-to-b from-white to-paper2 ring-1 ring-paper3 shadow-soft px-9 py-6">
+            <span class="font-body text-sm font-600 text-cocoa">ได้คะแนน</span>
+            <span class="font-mali font-700 text-orange text-5xl leading-none mt-1">3/3</span>
+            <div class="mt-3 flex gap-1.5 text-2xl">
+              <span class="twinkle">⭐</span><span class="twinkle d1">⭐</span><span class="twinkle d2">⭐</span>
+            </div>
+          </div>
+
+          <p class="mt-6 font-mali font-700 text-2xl text-grass">เก่งมาก! 🌿</p>
+          <p class="mt-1 font-body text-sm text-cocoa max-w-[18rem] mx-auto leading-relaxed">ฟังแล้วตอบได้ครบทุกข้อเลย พรุ่งนี้มาอ่านเรื่องใหม่ด้วยกันอีกนะ</p>
+
+          <!-- streak nudge -->
+          <div class="mt-5 inline-flex items-center gap-2 rounded-full bg-orange/12 px-4 py-2 ring-1 ring-orange/25">
+            <span class="text-lg">🔥</span>
+            <span class="font-body text-sm font-600 text-[#B5631A]">ต่อสตรีคได้ 4 วันแล้ว!</span>
+          </div>
+
+          <!-- buttons -->
+          <button onclick="go('play')" class="mt-7 w-full min-h-[60px] rounded-3xl bg-orange text-white font-mali font-700 text-xl shadow-press ring-1 ring-orange/40 transition-transform duration-200 ease-cozy active:scale-[0.98] active:translate-y-1 active:shadow-none flex items-center justify-center gap-2">
+            <span class="text-2xl">📖</span> เล่นอีก
+          </button>
+          <button onclick="go('home')" class="mt-3 w-full min-h-[56px] rounded-3xl bg-paper2 text-navy font-mali font-600 text-lg ring-1 ring-paper3 shadow-soft transition-transform duration-200 ease-cozy active:scale-[0.98] flex items-center justify-center gap-2">
+            <span class="text-xl">🏠</span> กลับหน้าแรก
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <p class="pb-8 text-center font-body text-xs text-cocoa/70">ListenUp - ตัวอย่างงานออกแบบ (Warm Storybook)</p>
+
+<script>
+  const tabs = document.querySelectorAll('.nav-tab');
+  function setActiveTab(target) {
+    tabs.forEach((t) => {
+      const on = t.dataset.target === target;
+      t.classList.toggle('bg-orange', on);
+      t.classList.toggle('text-white', on);
+      t.classList.toggle('shadow-soft', on);
+      t.classList.toggle('text-cocoa', !on);
+    });
+  }
+  function go(target) {
+    document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
+    const el = document.getElementById(target);
+    el.classList.add('active');
+    setActiveTab(target);
+    if (target === 'play') resetPlay();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  tabs.forEach((t) => t.addEventListener('click', () => go(t.dataset.target)));
+
+  // Play screen state
+  function resetPlay() {
+    document.getElementById('readyBtn').classList.remove('hidden');
+    document.getElementById('qBlock').classList.add('hidden');
+    document.getElementById('answerBox').classList.add('hidden');
+    document.getElementById('revealBtn').classList.remove('hidden');
+  }
+  function startAsking() {
+    document.getElementById('readyBtn').classList.add('hidden');
+    const q = document.getElementById('qBlock');
+    q.classList.remove('hidden');
+    q.firstElementChild.classList.add('reveal');
+  }
+  function revealAnswer() {
+    document.getElementById('revealBtn').classList.add('hidden');
+    document.getElementById('answerBox').classList.remove('hidden');
+  }
+  function grade() {
+    go('results');
+  }
+  function readAgain() {
+    const card = document.querySelector('#play .from-white');
+    card.classList.remove('reveal'); void card.offsetWidth; card.classList.add('reveal');
+  }
+
+  setActiveTab('home');
+</script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #1B3A6B;
+  --color-teal: #1AA9B0;
+  --color-teal-deep: #159AA1;
+  --color-orange: #F58220;
+  --color-grass: #5FBF3F;
+  --color-grass-deep: #4A9E2F;
+  --color-ring2: #2E7DD1;
+  --color-canvas: #F6F8FA;
+  --color-ink: #243B53;
+  --color-mute: #6B7E94;
+
+  --font-display: "Noto Sans Thai", sans-serif;
+  --font-sans: "IBM Plex Sans Thai", sans-serif;
+
+  --shadow-card: 0 10px 30px -16px rgba(27, 58, 107, 0.16), 0 4px 12px -8px rgba(27, 58, 107, 0.08);
+  --shadow-float: 0 24px 60px -20px rgba(26, 169, 176, 0.18), 0 8px 24px -12px rgba(27, 58, 107, 0.10);
+  --shadow-shell: 0 40px 90px -40px rgba(27, 58, 107, 0.22);
+
+  --ease-silk: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: #E6ECF2;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Ambient page field */
+.stage {
+  background:
+    radial-gradient(900px 520px at 88% -10%, rgba(26, 169, 176, 0.08), transparent 60%),
+    radial-gradient(820px 520px at 6% 110%, rgba(46, 125, 209, 0.07), transparent 60%),
+    linear-gradient(180deg, #EEF3F7 0%, #E6ECF2 100%);
+}
+
+.hero-field {
+  background:
+    radial-gradient(520px 320px at 85% 30%, rgba(26, 169, 176, 0.10), transparent 65%),
+    linear-gradient(180deg, #F4FBFC 0%, #ECF6F8 100%);
+}
+
+/* Tactile press / lift */
+.tap {
+  transition: transform 0.42s var(--ease-silk), box-shadow 0.42s var(--ease-silk), background-color 0.3s ease, color 0.3s ease;
+}
+.tap:active {
+  transform: scale(0.98);
+}
+
+/* Entry animations */
+.fade-in {
+  animation: fadeUp 0.6s var(--ease-silk) both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pop {
+  animation: pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes pop {
+  0% { opacity: 0; transform: scale(0.6); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.sparkle {
+  animation: spark 2.6s ease-in-out infinite;
+}
+@keyframes spark {
+  0%, 100% { opacity: 0.35; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Reveal answer transition */
+.reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.5s var(--ease-silk), opacity 0.45s var(--ease-silk);
+}
+.reveal > * {
+  overflow: hidden;
+}
+.reveal.shown {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+/* ── Immersive scene (kids-illustration direction) ───────────── */
+
+/* Sky backdrop: warm-blue gradient, soft sun glow top-right */
+.sky {
+  background:
+    radial-gradient(420px 280px at 86% 6%, rgba(255, 214, 102, 0.55), transparent 60%),
+    linear-gradient(180deg, #BDE9F7 0%, #DBF3FB 46%, #EAF8F1 100%);
+}
+
+/* chunky color cards */
+.card-pop {
+  transition: transform 0.42s var(--ease-silk), box-shadow 0.42s var(--ease-silk);
+}
+.card-pop:hover {
+  transform: translateY(-6px);
+}
+.card-pop:active {
+  transform: translateY(-2px) scale(0.99);
+}
+
+/* Floating ambient motion */
+.float-slow { animation: floatY 6s ease-in-out infinite; }
+.float-mid  { animation: floatY 4.5s ease-in-out infinite; }
+.drift      { animation: drift 26s linear infinite; }
+.bob        { animation: bob 5s ease-in-out infinite; }
+.sway       { animation: sway 7s ease-in-out infinite; transform-origin: bottom center; }
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+@keyframes drift {
+  from { transform: translateX(-6%); }
+  to   { transform: translateX(106%); }
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-6px) rotate(1deg); }
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-2.5deg); }
+  50%      { transform: rotate(2.5deg); }
+}
+
+/* speech bubble pop */
+.bubble-pop { animation: bubblePop 0.6s 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes bubblePop {
+  0%   { opacity: 0; transform: scale(0.5) translateY(8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp", "--user-data-dir", "/Users/Narathip.jc/.codex/playwright-personal"]
+    }
+  }
+}

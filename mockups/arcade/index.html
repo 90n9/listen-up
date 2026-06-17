@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ListenUp - Arcade</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=Mali:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          navy: '#1B3A6B',
+          teal: '#1AA9B0',
+          orange: '#F58220',
+          green: '#5FBF3F',
+          bluering: '#2E7DD1',
+          cream: '#FFF8EC',
+        },
+        fontFamily: {
+          head: ['"Bai Jamjuree"', 'sans-serif'],
+          fun: ['"Mali"', 'cursive'],
+          body: ['"Noto Sans Thai"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  :root { --ease-juicy: cubic-bezier(0.34, 1.56, 0.64, 1); }
+  body { background: #FDEFD3; font-family: 'Noto Sans Thai', sans-serif; }
+
+  /* sticker/badge depth */
+  .sticker { box-shadow: 4px 4px 0 #1B3A6B; }
+  .sticker-lg { box-shadow: 6px 6px 0 #1B3A6B; }
+  .sticker-sm { box-shadow: 3px 3px 0 #1B3A6B; }
+  .outline-navy { border: 3px solid #1B3A6B; }
+  .outline-navy-2 { border: 2px solid #1B3A6B; }
+
+  .press { transition: transform .12s var(--ease-juicy), box-shadow .12s var(--ease-juicy); }
+  .press:active { transform: translateY(4px) translateX(4px); box-shadow: 0px 0px 0 #1B3A6B; }
+  .press-sm { transition: transform .12s var(--ease-juicy), box-shadow .12s var(--ease-juicy); }
+  .press-sm:active { transform: translateY(3px) translateX(3px); box-shadow: 0px 0px 0 #1B3A6B; }
+
+  .pop { animation: pop .45s var(--ease-juicy) both; }
+  @keyframes pop { 0% { transform: scale(.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+  .float { animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+  .wiggle { animation: wiggle 2.5s ease-in-out infinite; }
+  @keyframes wiggle { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+  .burst { animation: burst .6s var(--ease-juicy) both; }
+  @keyframes burst { 0% { transform: scale(0) rotate(-40deg); opacity: 0; } 70% { transform: scale(1.2) rotate(5deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+
+  .confetti { position: absolute; width: 12px; height: 18px; border-radius: 3px; top: -20px; animation: fall linear infinite; }
+  @keyframes fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(620px) rotate(540deg); opacity: 0; }
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: swap .35s var(--ease-juicy) both; }
+  @keyframes swap { 0% { opacity: 0; transform: translateY(12px) scale(.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+
+  .xpfill { transition: width .8s var(--ease-juicy); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body class="font-body text-navy min-h-screen pb-28">
+
+  <!-- TOP SWITCHER -->
+  <div class="fixed top-0 inset-x-0 z-50 flex justify-center pt-3 pointer-events-none">
+    <div class="pointer-events-auto bg-white outline-navy sticker rounded-2xl p-1.5 flex gap-1.5">
+      <button data-nav="home"   class="nav-btn press-sm font-head font-bold text-sm px-3.5 py-2 rounded-xl">หน้าแรก</button>
+      <button data-nav="play"   class="nav-btn press-sm font-head font-bold text-sm px-3.5 py-2 rounded-xl">เล่น</button>
+      <button data-nav="result" class="nav-btn press-sm font-head font-bold text-sm px-3.5 py-2 rounded-xl">ผลลัพธ์</button>
+    </div>
+  </div>
+
+  <!-- ===================== HOME ===================== -->
+  <main id="home" class="screen active pt-24">
+    <div class="mx-auto max-w-[430px] px-5">
+
+      <!-- logo + tagline -->
+      <div class="text-center">
+        <img src="../logo.png" alt="ListenUp" class="mx-auto h-24 w-auto float drop-shadow-md" />
+        <h1 class="font-head font-bold text-4xl text-navy mt-2 leading-none">ListenUp</h1>
+        <p class="font-fun font-semibold text-teal text-lg mt-1">ฟังเก่ง คิดไว ได้ดาว!</p>
+      </div>
+
+      <!-- stat bar -->
+      <div class="mt-6 bg-white outline-navy sticker rounded-3xl p-4">
+        <div class="flex items-stretch gap-2 text-center">
+          <div class="flex-1 bg-orange/15 outline-navy-2 rounded-2xl py-2">
+            <div class="text-2xl leading-none">⭐</div>
+            <div class="font-head font-bold text-2xl text-orange leading-tight mt-0.5">24</div>
+            <div class="text-[11px] font-semibold text-navy/70">ดาวสะสม</div>
+          </div>
+          <div class="flex-1 bg-teal/15 outline-navy-2 rounded-2xl py-2">
+            <div class="text-2xl leading-none">🔥</div>
+            <div class="font-head font-bold text-2xl text-teal leading-tight mt-0.5">3</div>
+            <div class="text-[11px] font-semibold text-navy/70">วันต่อเนื่อง</div>
+          </div>
+          <div class="flex-1 bg-bluering/15 outline-navy-2 rounded-2xl py-2">
+            <div class="text-2xl leading-none">🏆</div>
+            <div class="font-head font-bold text-2xl text-bluering leading-tight mt-0.5">2</div>
+            <div class="text-[11px] font-semibold text-navy/70">เลเวล</div>
+          </div>
+        </div>
+        <!-- XP bar -->
+        <div class="mt-3.5">
+          <div class="flex justify-between items-end mb-1">
+            <span class="font-head font-bold text-xs text-navy">XP เลเวล 2</span>
+            <span class="font-head font-bold text-xs text-orange">140 / 200</span>
+          </div>
+          <div class="h-5 bg-navy/10 outline-navy-2 rounded-full overflow-hidden">
+            <div class="xpfill h-full rounded-full bg-orange flex items-center justify-end pr-2" style="width:70%">
+              <span class="text-[10px] font-bold text-white">70%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- primary CTA -->
+      <button data-nav="play" class="press w-full mt-6 bg-orange outline-navy sticker-lg rounded-3xl py-5 flex items-center justify-center gap-3 min-h-[64px] wiggle">
+        <span class="text-3xl">🎮</span>
+        <span class="font-head font-bold text-3xl text-white tracking-wide" style="text-shadow:2px 2px 0 #1B3A6B">เล่นเลย</span>
+      </button>
+
+      <!-- secondary -->
+      <button class="press-sm w-full mt-3 bg-white outline-navy sticker rounded-2xl py-3.5 flex items-center justify-center gap-2 min-h-[56px]">
+        <span class="text-xl">📚</span>
+        <span class="font-head font-bold text-lg text-navy">เลือกเรื่อง</span>
+      </button>
+
+      <!-- level badges -->
+      <div class="mt-7">
+        <h2 class="font-head font-bold text-lg text-navy mb-2 flex items-center gap-2"><span>🗺️</span>เลือกระดับ</h2>
+        <div class="grid grid-cols-3 gap-2.5">
+          <button class="press-sm relative bg-green outline-navy sticker rounded-2xl py-3 text-center">
+            <div class="absolute -top-2 -right-2 bg-white outline-navy-2 rounded-full w-7 h-7 flex items-center justify-center text-xs">⭐</div>
+            <div class="font-head font-bold text-4xl text-white leading-none" style="text-shadow:2px 2px 0 #1B3A6B">1</div>
+            <div class="font-head font-bold text-xs text-white mt-1">ระดับ 1</div>
+            <div class="text-[10px] font-semibold text-white/90">ง่ายๆ</div>
+          </button>
+          <button class="press-sm relative bg-teal outline-navy sticker rounded-2xl py-3 text-center">
+            <div class="font-head font-bold text-4xl text-white leading-none" style="text-shadow:2px 2px 0 #1B3A6B">2</div>
+            <div class="font-head font-bold text-xs text-white mt-1">ระดับ 2</div>
+            <div class="text-[10px] font-semibold text-white/90">ปานกลาง</div>
+          </button>
+          <button class="press-sm relative bg-white outline-navy sticker rounded-2xl py-3 text-center">
+            <div class="absolute -top-2 -right-2 bg-navy rounded-full w-7 h-7 flex items-center justify-center text-xs">🔒</div>
+            <div class="font-head font-bold text-4xl text-navy/30 leading-none">3</div>
+            <div class="font-head font-bold text-xs text-navy/50 mt-1">ระดับ 3</div>
+            <div class="text-[10px] font-semibold text-navy/40">ท้าทาย</div>
+          </button>
+        </div>
+      </div>
+
+      <p class="text-center font-fun text-sm text-navy/60 mt-7">พ่อแม่อ่านให้ฟัง - ลูกตอบคำถาม 👂✨</p>
+    </div>
+  </main>
+
+  <!-- ===================== PLAY ===================== -->
+  <main id="play" class="screen pt-24">
+    <div class="mx-auto max-w-[430px] px-5">
+
+      <!-- mission header + progress -->
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="bg-green outline-navy-2 sticker-sm rounded-full px-3 py-1 font-head font-bold text-sm text-white">ระดับ 1</span>
+          <span class="font-fun font-semibold text-sm text-navy/70">เรื่องที่ 1</span>
+        </div>
+        <div class="bg-white outline-navy-2 sticker-sm rounded-full px-3 py-1 font-head font-bold text-sm text-navy">ข้อ <span class="text-orange">2</span>/3</div>
+      </div>
+
+      <!-- question progress dots -->
+      <div class="flex gap-1.5 mb-4">
+        <div class="flex-1 h-3 rounded-full bg-green outline-navy-2"></div>
+        <div class="flex-1 h-3 rounded-full bg-orange outline-navy-2"></div>
+        <div class="flex-1 h-3 rounded-full bg-navy/10 outline-navy-2"></div>
+      </div>
+
+      <!-- sentence / mission card -->
+      <div class="bg-bluering outline-navy sticker-lg rounded-3xl p-5 relative">
+        <div class="absolute -top-3 left-4 bg-white outline-navy-2 sticker-sm rounded-full px-3 py-0.5 font-head font-bold text-xs text-bluering">🎧 ฟังให้ดี</div>
+        <p class="font-head font-bold text-2xl text-white leading-relaxed mt-2" style="text-shadow:1px 1px 0 #1B3A6B">
+          "ย่าไปซื้อผัก ปลา และเนื้อ ที่ตลาด"
+        </p>
+        <div class="flex items-center justify-between mt-3">
+          <span class="font-fun text-sm text-white/90">📖 พ่อแม่อ่านออกเสียง</span>
+          <button class="press-sm bg-white outline-navy-2 rounded-full px-3 py-1 font-head font-bold text-xs text-navy">🔁 อ่านอีกครั้ง</button>
+        </div>
+      </div>
+
+      <!-- ready button (start state) -->
+      <button id="readyBtn" class="press w-full mt-4 bg-teal outline-navy sticker rounded-2xl py-4 flex items-center justify-center gap-2 min-h-[60px]">
+        <span class="text-2xl">🎤</span>
+        <span class="font-head font-bold text-xl text-white" style="text-shadow:1px 1px 0 #1B3A6B">พร้อมแล้ว เริ่มถาม</span>
+      </button>
+
+      <!-- question block -->
+      <div id="qBlock" class="mt-4">
+        <!-- question card -->
+        <div class="bg-white outline-navy sticker rounded-3xl p-5 relative pop">
+          <div class="absolute -top-3 left-4 bg-orange outline-navy-2 sticker-sm rounded-full px-3 py-0.5 font-head font-bold text-xs text-white">❓ คำถามข้อ 2</div>
+          <p class="font-head font-bold text-2xl text-navy leading-snug mt-2">ย่าไปซื้อของที่ไหน?</p>
+
+          <!-- reveal answer -->
+          <button id="revealBtn" class="press-sm w-full mt-4 bg-cream outline-navy-2 rounded-2xl py-3 flex items-center justify-center gap-2 sticker-sm">
+            <span class="text-xl">💡</span>
+            <span class="font-head font-bold text-lg text-navy">เฉลย</span>
+          </button>
+
+          <!-- revealed answer -->
+          <div id="answerBox" class="hidden mt-4 bg-green/15 outline-navy-2 rounded-2xl p-4 pop">
+            <div class="font-head font-bold text-xs text-green mb-1">✅ คำตอบที่ถูกต้อง</div>
+            <p class="font-head font-bold text-2xl text-navy">ที่ตลาด</p>
+          </div>
+        </div>
+
+        <!-- grading buttons -->
+        <div id="gradeBox" class="hidden mt-4 grid grid-cols-2 gap-3 pop">
+          <button data-nav="result" class="press bg-green outline-navy sticker rounded-2xl py-5 flex flex-col items-center justify-center min-h-[72px]">
+            <span class="text-3xl">✅</span>
+            <span class="font-head font-bold text-xl text-white mt-1" style="text-shadow:1px 1px 0 #1B3A6B">ถูก</span>
+          </button>
+          <button class="press bg-orange outline-navy sticker rounded-2xl py-5 flex flex-col items-center justify-center min-h-[72px]" style="background-color:#E8453C">
+            <span class="text-3xl">❌</span>
+            <span class="font-head font-bold text-xl text-white mt-1" style="text-shadow:1px 1px 0 #1B3A6B">ผิด</span>
+          </button>
+        </div>
+
+        <p class="text-center font-fun text-xs text-navy/50 mt-4">ฟังคำตอบของลูก - แตะเฉลยเพื่อดูคำตอบ - แล้วให้คะแนน</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ===================== RESULT ===================== -->
+  <main id="result" class="screen pt-24 relative overflow-hidden">
+    <!-- confetti -->
+    <div id="confettiWrap" class="absolute inset-0 pointer-events-none"></div>
+
+    <div class="mx-auto max-w-[430px] px-5 relative z-10">
+
+      <!-- victory card -->
+      <div class="bg-white outline-navy sticker-lg rounded-[2rem] p-6 text-center mt-2">
+        <div class="text-6xl burst">🎉</div>
+        <h1 class="font-head font-bold text-4xl text-orange mt-2" style="text-shadow:2px 2px 0 #1B3A6B">เก่งมาก!</h1>
+        <p class="font-fun font-semibold text-navy/70 mt-1">ตอบถูกทุกข้อเลย สุดยอด!</p>
+
+        <!-- stars burst -->
+        <div class="flex justify-center gap-1 mt-4 text-4xl">
+          <span class="burst" style="animation-delay:.05s">⭐</span>
+          <span class="burst" style="animation-delay:.15s">⭐</span>
+          <span class="burst" style="animation-delay:.25s">⭐</span>
+        </div>
+
+        <!-- big score -->
+        <div class="mt-4 bg-teal/15 outline-navy rounded-3xl py-5">
+          <div class="font-fun font-semibold text-sm text-navy/70">คะแนนที่ได้</div>
+          <div class="font-head font-bold text-6xl text-teal leading-none mt-1" style="text-shadow:3px 3px 0 #1B3A6B">3/3</div>
+          <div class="font-head font-bold text-lg text-teal mt-1">ดาวเต็ม!</div>
+        </div>
+
+        <!-- XP gain -->
+        <div class="mt-4 inline-flex items-center gap-2 bg-orange outline-navy sticker rounded-full px-5 py-2 wiggle">
+          <span class="text-xl">⚡</span>
+          <span class="font-head font-bold text-xl text-white" style="text-shadow:1px 1px 0 #1B3A6B">+30 XP</span>
+        </div>
+
+        <!-- streak note -->
+        <div class="mt-4 flex items-center justify-center gap-2 font-head font-bold text-sm text-navy/70">
+          <span class="text-lg">🔥</span> ต่อเนื่อง 4 วันแล้ว!
+        </div>
+      </div>
+
+      <!-- actions -->
+      <button data-nav="play" class="press w-full mt-5 bg-green outline-navy sticker-lg rounded-3xl py-5 flex items-center justify-center gap-2 min-h-[64px]">
+        <span class="text-2xl">🔄</span>
+        <span class="font-head font-bold text-2xl text-white" style="text-shadow:2px 2px 0 #1B3A6B">เล่นอีก</span>
+      </button>
+      <button data-nav="home" class="press-sm w-full mt-3 bg-white outline-navy sticker rounded-2xl py-3.5 flex items-center justify-center gap-2 min-h-[56px]">
+        <span class="text-xl">🏠</span>
+        <span class="font-head font-bold text-lg text-navy">กลับหน้าแรก</span>
+      </button>
+    </div>
+  </main>
+
+<script>
+  // ----- screen switching -----
+  const screens = document.querySelectorAll('.screen');
+  const navBtns = document.querySelectorAll('.nav-btn');
+  function show(name) {
+    screens.forEach(s => s.classList.toggle('active', s.id === name));
+    navBtns.forEach(b => {
+      const on = b.dataset.nav === name;
+      b.classList.toggle('bg-navy', on);
+      b.classList.toggle('text-white', on);
+      b.classList.toggle('text-navy', !on);
+    });
+    window.scrollTo(0, 0);
+    if (name === 'play') resetPlay();
+    if (name === 'result') fireConfetti();
+  }
+  document.querySelectorAll('[data-nav]').forEach(el => {
+    el.addEventListener('click', () => show(el.dataset.nav));
+  });
+
+  // ----- play loop -----
+  const readyBtn  = document.getElementById('readyBtn');
+  const qBlock    = document.getElementById('qBlock');
+  const revealBtn = document.getElementById('revealBtn');
+  const answerBox = document.getElementById('answerBox');
+  const gradeBox  = document.getElementById('gradeBox');
+
+  // Spec: Play lands on the active, revealed question state (sentence card + answered question).
+  function resetPlay() {
+    readyBtn.classList.add('hidden');
+    qBlock.classList.remove('hidden');
+    answerBox.classList.remove('hidden');
+    gradeBox.classList.remove('hidden');
+    revealBtn.classList.add('hidden');
+  }
+  readyBtn.addEventListener('click', () => {
+    readyBtn.classList.add('hidden');
+    qBlock.classList.remove('hidden');
+  });
+  revealBtn.addEventListener('click', () => {
+    answerBox.classList.remove('hidden');
+    gradeBox.classList.remove('hidden');
+    revealBtn.classList.add('hidden');
+  });
+
+  // ----- confetti -----
+  const colors = ['#1AA9B0', '#F58220', '#5FBF3F', '#2E7DD1', '#1B3A6B'];
+  function fireConfetti() {
+    const wrap = document.getElementById('confettiWrap');
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    wrap.innerHTML = '';
+    for (let i = 0; i < 40; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + '%';
+      c.style.background = colors[i % colors.length];
+      c.style.animationDuration = (2 + Math.random() * 2) + 's';
+      c.style.animationDelay = (Math.random() * 1.2) + 's';
+      c.style.transform = `rotate(${Math.random() * 360}deg)`;
+      wrap.appendChild(c);
+    }
+  }
+
+  // init
+  show('home');
+  resetPlay();
+</script>
+</body>
+</html>

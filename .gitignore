@@ -1,0 +1,16 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+.vite
+
+# scratch design artifacts
+shot-*.png
+.playwright-mcp
+
+# build info
+*.tsbuildinfo
+
+# local tooling
+.agents/

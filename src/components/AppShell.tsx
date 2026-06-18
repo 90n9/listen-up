@@ -64,9 +64,24 @@ export default function AppShell({ children, size = 'wide', header = true }: Pro
   }
 
   return (
-    <div className="min-h-[100dvh] bg-white">
+    <div className="min-h-[100dvh] bg-white flex flex-col">
       {header && <Header />}
-      {children}
+      <div className="flex-1">{children}</div>
+      <Footer />
     </div>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-navy/8 bg-white">
+      <div className="mx-auto max-w-[1240px] px-5 lg:px-10 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <span className="text-sm text-navy/50">© 2026 ListenUp · ฟังเป็น ตอบได้</span>
+        <nav className="flex items-center gap-5 text-sm font-bold text-navy/60">
+          <Link to="/privacy" className="hover:text-teal">นโยบายความเป็นส่วนตัว</Link>
+          <Link to="/terms" className="hover:text-teal">ข้อกำหนดการใช้งาน</Link>
+        </nav>
+      </div>
+    </footer>
   );
 }

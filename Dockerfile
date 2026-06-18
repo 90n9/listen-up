@@ -10,6 +10,10 @@ RUN npm ci
 
 # Build the Vite app
 COPY . .
+# GA Measurement ID is inlined at build time (Vite). Pass via:
+#   docker build --build-arg VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX .
+ARG VITE_GA_MEASUREMENT_ID
+ENV VITE_GA_MEASUREMENT_ID=$VITE_GA_MEASUREMENT_ID
 RUN npm run build
 
 # --- Serve stage ---

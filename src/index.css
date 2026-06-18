@@ -56,8 +56,22 @@ body {
     linear-gradient(180deg, #F4FBFC 0%, #ECF6F8 100%);
 }
 
+/* Tailwind v4 preflight resets clickable elements to cursor:default — restore pointer */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+label[for],
+summary,
+a {
+  cursor: pointer;
+}
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 /* Tactile press / lift */
 .tap {
+  cursor: pointer;
   transition: transform 0.42s var(--ease-silk), box-shadow 0.42s var(--ease-silk), background-color 0.3s ease, color 0.3s ease;
 }
 .tap:active {

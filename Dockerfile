@@ -10,9 +10,11 @@ RUN npm ci
 
 # Build the Vite app
 COPY . .
-# GA Measurement ID is inlined at build time (Vite). Pass via:
+# GA4 Measurement ID is inlined at build time (Vite). It is a public client-side
+# identifier (shipped in the browser bundle), not a secret, so the production
+# default lives here. Override per-build with:
 #   docker build --build-arg VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX .
-ARG VITE_GA_MEASUREMENT_ID
+ARG VITE_GA_MEASUREMENT_ID=G-9EZPKMJPPL
 ENV VITE_GA_MEASUREMENT_ID=$VITE_GA_MEASUREMENT_ID
 RUN npm run build
 

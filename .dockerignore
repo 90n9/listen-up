@@ -1,0 +1,14 @@
+node_modules
+dist
+dist-ssr
+.git
+.github
+.vite
+*.local
+.DS_Store
+*.tsbuildinfo
+.playwright-mcp
+.agents
+.claude
+mockups
+shot-*.png

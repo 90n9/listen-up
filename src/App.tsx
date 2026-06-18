@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import HomeScreen from './screens/HomeScreen';
+import StartScreen from './screens/StartScreen';
 import BrowseScreen from './screens/BrowseScreen';
 import PlayScreen from './screens/PlayScreen';
 import ResultsScreen from './screens/ResultsScreen';
@@ -23,6 +24,7 @@ export default function App() {
       <RouteTracker />
       <Routes>
         <Route path="/" element={<HomeScreen />} />
+        <Route path="/start" element={<StartScreen />} />
         <Route path="/browse" element={<BrowseScreen />} />
         <Route path="/play/:id" element={<PlayScreen />} />
         <Route path="/results" element={<ResultsScreen />} />

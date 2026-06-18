@@ -12,8 +12,7 @@ import {
   ArrowRight,
 } from '../components/icons';
 import { Cloud, Sun, Tree, Boat, HillsWater, WaveDivider } from '../components/Scene';
-import { LIBRARY, getStoryById } from '../data/library';
-import { pickRandom } from '../lib/shuffle';
+import { getStoryById } from '../data/library';
 import { useProgress, formatThaiRelative } from '../lib/useProgress';
 import type { StorySet } from '../data/types';
 
@@ -34,7 +33,7 @@ export default function HomeScreen() {
   const navigate = useNavigate();
   const { progress } = useProgress();
 
-  const playRandom = () => navigate(`/play/${pickRandom(LIBRARY).id}`);
+  const startPractice = () => navigate('/start');
 
   const modes: Mode[] = [
     {
@@ -68,7 +67,7 @@ export default function HomeScreen() {
       surface: 'bg-orange',
       chip: 'text-orange',
       pill: 'bg-white/90 text-orange',
-      onClick: playRandom,
+      onClick: startPractice,
     },
   ];
 
@@ -99,7 +98,7 @@ export default function HomeScreen() {
               ฟังเรื่องราวสนุก ๆ แล้วตอบคำถาม ฝึกได้ทุกวัน
             </p>
             <button
-              onClick={playRandom}
+              onClick={startPractice}
               className="tap mt-6 lg:mt-8 inline-flex items-center gap-2.5 rounded-full bg-orange text-white pl-2 pr-7 py-2 lg:py-2.5 text-[18px] lg:text-[20px] font-extrabold shadow-float hover:brightness-105"
             >
               <span className="h-10 w-10 lg:h-12 lg:w-12 rounded-full bg-white/25 flex items-center justify-center">

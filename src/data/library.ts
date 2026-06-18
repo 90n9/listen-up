@@ -1,4 +1,4 @@
-import type { StorySet } from './types';
+import type { Level, StorySet } from './types';
 
 /**
  * Curated Thai listening-comprehension library.
@@ -1206,4 +1206,9 @@ export const LIBRARY: StorySet[] = [
 
 export function getStoryById(id: string): StorySet | undefined {
   return LIBRARY.find((s) => s.id === id);
+}
+
+/** All stories at a given difficulty level. */
+export function storiesByLevel(level: Level): StorySet[] {
+  return LIBRARY.filter((s) => s.level === level);
 }

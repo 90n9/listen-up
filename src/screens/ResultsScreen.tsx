@@ -3,7 +3,7 @@ import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import AppShell from '../components/AppShell';
 import { ArrowRight } from '../components/icons';
-import { LIBRARY } from '../data/library';
+import { LIBRARY, getStoryById, storiesByLevel } from '../data/library';
 import { pickRandomExcept } from '../lib/shuffle';
 import { useProgress } from '../lib/useProgress';
 
@@ -53,7 +53,11 @@ export default function ResultsScreen() {
         ? 'เกือบเต็มแล้ว ฝึกอีกนิดก็เก่งสุดๆ'
         : 'ฟังอีกครั้งแล้วลองตอบใหม่ ค่อยๆเก่งขึ้นทุกวัน';
 
-  const playAgain = () => navigate(`/play/${pickRandomExcept(LIBRARY, setId).id}`, { replace: true });
+  // Stay within the level the parent picked for this session (the played
+  // story's level); fall back to the whole library if it's somehow unknown.
+  const playedLevel = getStoryById(setId)?.level;
+  const pool = playedLevel ? storiesByLevel(playedLevel) : LIBRARY;
+  const playAgain = () => navigate(`/play/${pickRandomExcept(pool, setId).id}`, { replace: true });
 
   return (
     <AppShell size="narrow" header={false}>

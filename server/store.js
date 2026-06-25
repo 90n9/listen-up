@@ -1,6 +1,6 @@
 // Tiny JSON-file subscription store. No native deps; persisted to a Docker
 // volume via DATA_DIR. Keyed by push-subscription endpoint (unique per device).
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rename } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 const DATA_DIR = process.env.DATA_DIR || './data';
@@ -16,19 +16,33 @@ async function ensureLoaded() {
   try {
     const raw = await readFile(FILE, 'utf8');
     const arr = JSON.parse(raw);
-    for (const rec of arr) cache.set(rec.subscription.endpoint, rec);
+    for (const rec of arr) {
+      // Skip corrupt/partial records instead of aborting the whole load.
+      const endpoint = rec?.subscription?.endpoint;
+      if (endpoint) cache.set(endpoint, rec);
+    }
   } catch {
     // first run / missing file — start empty
   }
 }
 
 async function persist() {
-  // Serialize writes so concurrent requests don't clobber the file.
-  writing = writing.then(async () => {
-    await mkdir(dirname(FILE), { recursive: true });
-    await writeFile(FILE, JSON.stringify([...cache.values()], null, 2));
-  });
+  // Serialize writes so concurrent requests don't clobber the file, and
+  // reset the chain on failure so one bad write doesn't poison all future ones.
+  writing = writing.then(
+    () => doWrite(),
+    () => doWrite(),
+  );
   return writing;
+}
+
+async function doWrite() {
+  await mkdir(dirname(FILE), { recursive: true });
+  // Atomic swap: write to a temp file then rename, so a crash mid-write
+  // can't corrupt the live subscription list.
+  const tmp = `${FILE}.tmp`;
+  await writeFile(tmp, JSON.stringify([...cache.values()], null, 2));
+  await rename(tmp, FILE);
 }
 
 /**

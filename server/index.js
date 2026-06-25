@@ -11,6 +11,7 @@ const {
   ALLOWED_ORIGIN = '*',
   REMINDER_CRON = '0 18 * * *', // 18:00 daily
   REMINDER_TZ = 'Asia/Bangkok',
+  ADMIN_TOKEN = '', // gate the manual reminder trigger; disabled when empty
 } = process.env;
 
 if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
@@ -52,21 +53,33 @@ app.post('/api/subscribe', async (req, res) => {
 app.post('/api/sync', async (req, res) => {
   const { endpoint, lastPlayedDate, streakDays } = req.body || {};
   if (!endpoint) return res.status(400).json({ error: 'missing endpoint' });
-  await sync(endpoint, { lastPlayedDate, streakDays });
-  res.json({ ok: true });
+  try {
+    await sync(endpoint, { lastPlayedDate, streakDays });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: String(e.message || e) });
+  }
 });
 
 app.post('/api/unsubscribe', async (req, res) => {
   const { endpoint } = req.body || {};
   if (!endpoint) return res.status(400).json({ error: 'missing endpoint' });
-  await remove(endpoint);
-  res.json({ ok: true });
+  try {
+    await remove(endpoint);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: String(e.message || e) });
+  }
 });
 
-/** Local YYYY-MM-DD for a given IANA timezone. */
+/** Local YYYY-MM-DD for a given IANA timezone (falls back if tz is garbage). */
 function todayIn(tz) {
-  // en-CA gives ISO-ish YYYY-MM-DD
-  return new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
+  try {
+    // en-CA gives ISO-ish YYYY-MM-DD
+    return new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date());
+  } catch {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: REMINDER_TZ }).format(new Date());
+  }
 }
 
 /** Send the streak-risk reminder to everyone who hasn't played today. */
@@ -100,12 +113,23 @@ async function sendReminders() {
   console.log(`[reminders] sent=${sent} pruned=${pruned} total=${subs.length}`);
 }
 
-cron.schedule(REMINDER_CRON, sendReminders, { timezone: REMINDER_TZ });
+cron.schedule(
+  REMINDER_CRON,
+  () => sendReminders().catch((e) => console.error('reminder sweep failed', e)),
+  { timezone: REMINDER_TZ },
+);
 
-// Manual trigger for testing (guard behind an env token in prod if exposed).
-app.post('/api/_run-reminders', async (_req, res) => {
-  await sendReminders();
-  res.json({ ok: true });
+// Manual trigger — gated behind ADMIN_TOKEN; disabled entirely when unset.
+app.post('/api/_run-reminders', async (req, res) => {
+  if (!ADMIN_TOKEN || req.get('x-admin-token') !== ADMIN_TOKEN) {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  try {
+    await sendReminders();
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: String(e.message || e) });
+  }
 });
 
 app.listen(Number(PORT), () => {

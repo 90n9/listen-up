@@ -86,8 +86,9 @@ export function notPlayedToday(p: Progress): boolean {
 }
 
 /**
- * The player has a live streak that will break unless they play today.
- * (A streak with a freeze in hand is not "at risk" — the freeze bridges it.)
+ * The player has a live streak and hasn't played today, so we nudge them.
+ * We always nudge (even with a freeze in hand) — a freeze only bridges a
+ * single missed day, so playing today is still the safe action.
  */
 export function streakAtRisk(p: Progress): boolean {
   return p.streakDays > 0 && notPlayedToday(p);
@@ -125,8 +126,9 @@ export function useProgress() {
       const alreadyPlayedToday = prev.lastPlayedDate === today;
 
       if (alreadyPlayedToday) {
-        // Replaying the same day never changes the streak.
-        streak = Math.max(streak, 1);
+        // Replaying the same day never changes the streak (and never
+        // fabricates one from corrupt state where streak is 0).
+        streak = prevStreak;
       } else {
         const diff = prev.lastPlayedDate ? dayDiff(prev.lastPlayedDate, today) : Infinity;
         if (diff === 1) {

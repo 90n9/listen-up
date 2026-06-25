@@ -1,0 +1,17 @@
+{
+  "name": "listenup-push",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Web-Push come-back reminder service for ListenUp",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "gen-vapid": "web-push generate-vapid-keys --json"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "node-cron": "^3.0.3",
+    "web-push": "^3.6.7"
+  }
+}

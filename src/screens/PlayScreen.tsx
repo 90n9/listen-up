@@ -13,6 +13,8 @@ export default function PlayScreen() {
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [correct, setCorrect] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [maxCombo, setMaxCombo] = useState(0);
 
   if (!story) return <Navigate to="/" replace />;
 
@@ -21,14 +23,18 @@ export default function PlayScreen() {
 
   const grade = (isCorrect: boolean) => {
     const nextCorrect = correct + (isCorrect ? 1 : 0);
+    const nextCombo = isCorrect ? combo + 1 : 0;
+    const nextMax = Math.max(maxCombo, nextCombo);
     if (index + 1 >= total) {
       navigate('/results', {
         replace: true,
-        state: { setId: story.id, correct: nextCorrect, total },
+        state: { setId: story.id, correct: nextCorrect, total, maxCombo: nextMax },
       });
       return;
     }
     setCorrect(nextCorrect);
+    setCombo(nextCombo);
+    setMaxCombo(nextMax);
     setIndex(index + 1);
     setRevealed(false);
   };
@@ -85,6 +91,15 @@ export default function PlayScreen() {
               <RotateIcon className="w-4 h-4" />
               อ่านอีกครั้ง
             </button>
+
+            {/* combo meter */}
+            {combo >= 2 && (
+              <div className="mb-3 flex items-center justify-center pop">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-orange text-white px-4 py-1.5 text-[14px] font-extrabold shadow-float">
+                  🔥 คอมโบ x{combo}
+                </span>
+              </div>
+            )}
 
             {/* question */}
             <div className="flex items-center justify-between mb-3">

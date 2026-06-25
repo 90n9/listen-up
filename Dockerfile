@@ -16,6 +16,11 @@ COPY . .
 #   docker build --build-arg VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX .
 ARG VITE_GA_MEASUREMENT_ID=G-9EZPKMJPPL
 ENV VITE_GA_MEASUREMENT_ID=$VITE_GA_MEASUREMENT_ID
+# Base URL of the self-hosted push backend (Phase 2 come-back reminders).
+# Leave empty to ship without push; the notify UI then hides itself.
+#   docker build --build-arg VITE_PUSH_API=https://listenup-api.gongideas.com .
+ARG VITE_PUSH_API=
+ENV VITE_PUSH_API=$VITE_PUSH_API
 RUN npm run build
 
 # --- Serve stage ---

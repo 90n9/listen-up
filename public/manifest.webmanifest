@@ -1,0 +1,25 @@
+{
+  "name": "ListenUp - ฝึกฟังกับลูก",
+  "short_name": "ListenUp",
+  "description": "ฝึกทักษะการฟังให้เด็กๆ พ่อแม่อ่านเรื่องสั้นให้ฟัง ลูกตอบคำถาม",
+  "lang": "th",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F2FAF4",
+  "theme_color": "#1AA9B0",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/mascot.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

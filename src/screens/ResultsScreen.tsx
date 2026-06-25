@@ -1,19 +1,28 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import AppShell from '../components/AppShell';
 import { ArrowRight } from '../components/icons';
 import { LIBRARY, getStoryById, storiesByLevel } from '../data/library';
 import { pickRandomExcept } from '../lib/shuffle';
-import { useProgress } from '../lib/useProgress';
+import { useProgress, localDate, type SessionSummary } from '../lib/useProgress';
+import { syncPush } from '../lib/push';
 
 interface ResultState {
   setId: string;
   correct: number;
   total: number;
+  maxCombo?: number;
 }
 
 const BRAND = ['#1AA9B0', '#F58220', '#5FBF3F', '#2E7DD1', '#1B3A6B'];
+
+/** Bonus stars for keeping a combo going within the session. */
+function comboBonus(correct: number, total: number, maxCombo: number): number {
+  if (total > 0 && correct === total) return 2; // perfect run
+  if (maxCombo >= 3) return 1;
+  return 0;
+}
 
 export default function ResultsScreen() {
   const location = useLocation();
@@ -21,6 +30,7 @@ export default function ResultsScreen() {
   const state = location.state as ResultState | null;
   const { progress, commitSession } = useProgress();
   const committed = useRef(false);
+  const [summary, setSummary] = useState<SessionSummary | null>(null);
 
   const reduceMotion =
     typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -28,7 +38,11 @@ export default function ResultsScreen() {
   useEffect(() => {
     if (!state || committed.current) return;
     committed.current = true;
-    commitSession(state.setId, state.correct);
+    const bonus = comboBonus(state.correct, state.total, state.maxCombo ?? 0);
+    const result = commitSession(state.setId, state.correct, bonus);
+    setSummary(result);
+    // Tell the push backend we played today so the evening nudge skips us.
+    void syncPush({ lastPlayedDate: localDate(), streakDays: result.newStreak });
 
     if (!reduceMotion) {
       const fire = (ratio: number, opts: confetti.Options) =>
@@ -37,6 +51,14 @@ export default function ResultsScreen() {
       fire(0.35, { spread: 60 });
       fire(0.35, { spread: 100, decay: 0.91, scalar: 0.9 });
       fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+
+      // Extra burst when a streak milestone is reached.
+      if (result.milestone) {
+        setTimeout(() => {
+          fire(0.4, { spread: 80, startVelocity: 45, origin: { y: 0.4 } });
+          fire(0.4, { spread: 120, decay: 0.9, scalar: 1.1, origin: { y: 0.4 } });
+        }, 350);
+      }
     }
   }, [state, commitSession, reduceMotion]);
 
@@ -76,6 +98,17 @@ export default function ResultsScreen() {
         <h2 className="font-display mt-6 text-[30px] font-extrabold tracking-tight text-navy fade-in">{message}</h2>
         <p className="mt-2 text-[15px] text-mute fade-in max-w-[20rem] mx-auto">{sub}</p>
 
+        {/* milestone celebration */}
+        {summary?.milestone && (
+          <div className="mt-5 mx-auto max-w-[22rem] rounded-3xl bg-orange/10 ring-1 ring-orange/25 px-5 py-4 pop">
+            <p className="text-[28px] leading-none">🏆</p>
+            <p className="font-display mt-2 text-[20px] font-extrabold text-orange">
+              สตรีค {summary.milestone} วันแล้ว!
+            </p>
+            <p className="mt-1 text-[13px] text-ink/70">เล่นต่อเนื่องเก่งมาก สู้ ๆ ต่อไปนะ</p>
+          </div>
+        )}
+
         {/* score */}
         <div className="mt-7 inline-flex flex-col items-center fade-in">
           <p className="text-[13px] font-semibold tracking-[0.16em] uppercase text-teal">คะแนนรอบนี้</p>
@@ -97,15 +130,32 @@ export default function ResultsScreen() {
           ))}
         </div>
 
+        {/* combo bonus */}
+        {summary && summary.bonusStars > 0 && (
+          <p className="mt-4 text-[14px] font-bold text-orange fade-in">
+            🔥 โบนัสคอมโบ +{summary.bonusStars} ดาว
+          </p>
+        )}
+
         {/* streak strip */}
         {progress.streakDays > 0 && (
-          <div className="mt-7 inline-flex items-center justify-center gap-2 rounded-2xl bg-canvas/80 px-4 py-3 ring-1 ring-navy/5 fade-in">
+          <div className="mt-7 inline-flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-canvas/80 px-4 py-3 ring-1 ring-navy/5 fade-in">
             <span className="rounded-full bg-grass/12 px-2.5 py-1 text-[12.5px] font-bold text-grass-deep ring-1 ring-grass/20">
-              สตรีค {progress.streakDays} วัน
+              🔥 สตรีค {progress.streakDays} วัน
             </span>
             <span className="rounded-full bg-orange/12 px-2.5 py-1 text-[12.5px] font-bold text-orange ring-1 ring-orange/20">
               รวม {progress.totalStars} ดาว
             </span>
+            {summary?.freezeGranted && (
+              <span className="rounded-full bg-ring2/12 px-2.5 py-1 text-[12.5px] font-bold text-ring2 ring-1 ring-ring2/20">
+                🛡️ ได้ตัวป้องกันสตรีค
+              </span>
+            )}
+            {summary?.freezeUsed && (
+              <span className="rounded-full bg-ring2/12 px-2.5 py-1 text-[12.5px] font-bold text-ring2 ring-1 ring-ring2/20">
+                🛡️ ใช้ตัวป้องกันรักษาสตรีค
+              </span>
+            )}
           </div>
         )}
 

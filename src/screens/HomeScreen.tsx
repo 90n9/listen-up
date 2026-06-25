@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from '../components/icons';
 import { Cloud, Sun, Tree, Boat, HillsWater, WaveDivider } from '../components/Scene';
+import StreakCard from '../components/StreakCard';
 import { getStoryById } from '../data/library';
 import { useProgress, formatThaiRelative } from '../lib/useProgress';
 import type { StorySet } from '../data/types';
@@ -151,6 +152,11 @@ export default function HomeScreen() {
       {/* ── Mode cards on soft canvas ───────────────────── */}
       <div className="bg-[#F2FAF4]">
         <div className="mx-auto max-w-[1240px] px-5 lg:px-10 pt-4 pb-12 lg:pb-16">
+          {/* daily streak */}
+          <div className="pt-2 mb-8 lg:mb-10">
+            <StreakCard progress={progress} />
+          </div>
+
           <div className="flex items-center gap-2.5 mb-5 lg:mb-7">
             <span className="h-9 w-9 rounded-xl bg-teal/15 flex items-center justify-center text-teal text-xl">🎧</span>
             <h2 className="font-display text-[22px] lg:text-[26px] font-extrabold text-navy">เลือกการ์ดเพื่อเล่น</h2>
